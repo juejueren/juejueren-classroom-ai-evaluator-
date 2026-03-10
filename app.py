@@ -213,4 +213,139 @@ def plot_st_chart(sequence):
     max_axis = max(2700, total_sec)
     ax.set_xlim(0, max_axis); ax.set_ylim(0, max_axis)
     ax.set_xlabel("教师时间 (T)", fontproperties=ZH_FONT)
-    ax.set_ylabel("学生时间 (S)", fontproperties=ZH_
+    ax.set_ylabel("学生时间 (S)", fontproperties=ZH_FONT)
+    ax.set_title("课堂 S-T 分析图", fontproperties=ZH_FONT, fontsize=12, fontweight='bold')
+    ax.grid(True, alpha=0.3)
+    ax.legend(prop=ZH_FONT)
+    plt.tight_layout()
+    return fig
+
+def plot_rt_ch_chart(Rt, Ch):
+    fig, ax = plt.subplots(figsize=(6, 5))
+    ax.set_xlim(0, 1); ax.set_ylim(0, 1)
+    ax.set_xlabel("学生参与度 (Rt)", fontproperties=ZH_FONT)
+    ax.set_ylabel("交互有效性 (Ch)", fontproperties=ZH_FONT)
+    ax.add_patch(patches.Rectangle((0.7, 0), 0.3, 0.4, color='#f4cccc', alpha=0.5))
+    ax.text(0.85, 0.2, '讲授型', fontproperties=ZH_FONT, ha='center')
+    ax.plot(Rt, Ch, marker='*', color='red', markersize=12)
+    ax.set_title("Rt-Ch 模式分析", fontproperties=ZH_FONT, fontweight='bold')
+    plt.tight_layout()
+    return fig
+
+def plot_bloom_pie(high, low):
+    fig, ax = plt.subplots(figsize=(4, 4))
+    ax.pie([high, low], labels=['高阶', '低阶'], autopct='%1.1f%%', startangle=90, textprops={'fontproperties': ZH_FONT})
+    ax.set_title("布鲁姆认知层次", fontproperties=ZH_FONT)
+    return fig
+
+def plot_four_w_bar(know, app):
+    fig, ax = plt.subplots(figsize=(4, 4))
+    ax.bar(['知识', '应用'], [know, app], color=['#99ff99', '#ffcc99'])
+    for tick in ax.get_xticklabels(): tick.set_fontproperties(ZH_FONT)
+    ax.set_title("提问维度分布", fontproperties=ZH_FONT)
+    return fig
+
+# ==========================================
+# 5. UI 主逻辑
+# ==========================================
+st.set_page_config(page_title="思政课堂分析", layout="wide")
+st.title("🎓 思政课堂 AI 评估系统")
+
+user_text = st.text_area("请输入课堂实录文本：", height=150)
+
+if st.button("🚀 开始分析"):
+    if not user_text.strip():
+        st.warning("⚠️ 请先输入课堂转录文本！")
+    else:
+        # 创建进度条
+        progress_bar = st.progress(0, text="准备开始分析...")
+        
+        try:
+            # --- 模块 1：课堂调控 ---
+            progress_bar.progress(10, text="🧠 正在提取课堂调控数据 (1/4)...")
+            m1_raw = fetch_evaluation(user_text, SYSTEM_PROMPT_M1)
+            m1_data = json.loads(m1_raw.strip().replace('```json', '').replace('```', ''))
+            metrics_m1 = calculate_metrics_m1(m1_data)
+            
+            # --- 模块 2：思维激发 ---
+            progress_bar.progress(35, text="🧠 正在分析思维激发维度 (2/4)...")
+            m2_raw = fetch_evaluation(user_text, SYSTEM_PROMPT_M2)
+            m2_data = json.loads(m2_raw.strip().replace('```json', '').replace('```', ''))
+            metrics_m2 = calculate_metrics_m2(m2_data)
+            
+            # --- 模块 3：核心素养 ---
+            progress_bar.progress(60, text="🧠 正在评估学科核心素养 (3/4)...")
+            m3_raw = fetch_evaluation(user_text, SYSTEM_PROMPT_M3)
+            m3_data = json.loads(m3_raw.strip().replace('```json', '').replace('```', ''))
+            metrics_m3 = calculate_metrics_m3(m3_data)
+            
+            # --- 模块 4：评价反馈 ---
+            progress_bar.progress(85, text="🧠 正在诊断评价反馈质量 (4/4)...")
+            m4_raw = fetch_evaluation(user_text, SYSTEM_PROMPT_M4)
+            m4_data = json.loads(m4_raw.strip().replace('```json', '').replace('```', ''))
+            metrics_m4 = calculate_metrics_m4(m4_data)
+            
+            # --- 综合评分计算 ---
+            progress_bar.progress(95, text="✨ 正在生成综合评估报告...")
+            overall = calculate_overall_score(metrics_m1, metrics_m2, metrics_m3, metrics_m4)
+            
+            progress_bar.empty() # 完成后移除进度条
+            st.success("✅ 评估完成！")
+
+            # ================== 第一部分：总评报告 (大屏效果) ==================
+            st.markdown("---")
+            st.markdown("## 🏆 课堂综合评级报告")
+            col_res1, col_res2 = st.columns([1, 1.5])
+            
+            with col_res1:
+                st.markdown(f"""
+                <div style='text-align: center; border: 2px solid #4CAF50; border-radius: 15px; padding: 30px; background-color: #f9fdf9;'>
+                    <h3 style='margin:0; color: #555;'>最终得分</h3>
+                    <h1 style='font-size: 60px; color: #4CAF50; margin: 10px 0;'>{overall['total_score']}</h1>
+                    <h2 style='color: #2E7D32;'>评级：{overall['final_grade']}</h2>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col_res2:
+                # 使用 Plotly 绘制雷达图
+                st.plotly_chart(plot_overall_radar(
+                    overall['m1_norm'], overall['m2_norm'], overall['m3_norm'], overall['m4_norm']
+                ), use_container_width=True)
+
+            # ================== 第二部分：详细模块展示 ==================
+            st.markdown("### 📊 维度诊断详情")
+            tab_m1, tab_m2, tab_m3, tab_m4 = st.tabs(["课堂调控", "思维激发", "核心素养", "评价反馈"])
+
+            with tab_m1:
+                st.markdown("#### 🎯 S-T 行为分析与交互频率")
+                c1, c2 = st.columns(2)
+                with c1: st.pyplot(plot_st_chart(metrics_m1['sequence']))
+                with c2: st.pyplot(plot_rt_ch_chart(metrics_m1['Rt'], metrics_m1['Ch']))
+                st.info(f"**教学模式判定**：{metrics_m1['teaching_model']}")
+
+            with tab_m2:
+                st.markdown("#### 🧠 提问深度与认知层次")
+                c3, c4 = st.columns(2)
+                with c3: st.pyplot(plot_bloom_pie(metrics_m2['bloom_high'], metrics_m2['bloom_low']))
+                with c4: st.pyplot(plot_four_w_bar(metrics_m2['w_know'], metrics_m2['w_app']))
+                st.write(f"**教师启发比 (I/D)**: {metrics_m2['id_ratio']:.2f}")
+
+            with tab_m3:
+                st.markdown("#### 🌟 核心素养切片打标")
+                # 简单列出各维度等级
+                for dim in ['political_endorsement', 'scientific_spirit', 'rule_of_law', 'public_participation']:
+                    m = metrics_m3[dim]
+                    st.write(f"**{dim}**: {m['grade']} (有效切片: {m['total_slices']})")
+                with st.expander("🔍 查看原始切片数据"):
+                    st.json(metrics_m3['raw_slices'])
+
+            with tab_m4:
+                st.markdown("#### 🗣️ 师生评价有效性")
+                st.metric("评价反馈率", f"{metrics_m4['feedback_rate']*100:.1f}%")
+                st.metric("积极情感率", f"{metrics_m4['positive_rate']*100:.1f}%")
+                st.success(f"**专家定性评价**：{metrics_m4['qualitative_evaluation']}")
+
+        except json.JSONDecodeError:
+            st.error("❌ AI 返回的数据格式有误，请重试。")
+        except Exception as e:
+            st.error(f"❌ 分析发生错误：{str(e)}")
