@@ -139,57 +139,27 @@ SYSTEM_PROMPT_M4 = """# Role
 @st.cache_data(show_spinner=False, persist="disk")
 def fetch_m1_evaluation(text):
     client = OpenAI(api_key=API_KEY, base_url="https://dashscope.aliyuncs.com/compatible-mode/v1")
-    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M1}, {"role": "user", "content": text}], temperature=0.0)
+    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M1}, {"role": "user", "content": text}])
     return resp.choices[0].message.content
 
 @st.cache_data(show_spinner=False, persist="disk")
 def fetch_m2_evaluation(text):
     client = OpenAI(api_key=API_KEY, base_url="https://dashscope.aliyuncs.com/compatible-mode/v1")
-    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M2}, {"role": "user", "content": text}], temperature=0.0)
+    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M2}, {"role": "user", "content": text}])
     return resp.choices[0].message.content
 
 @st.cache_data(show_spinner=False, persist="disk")
 def fetch_m3_evaluation(text):
     client = OpenAI(api_key=API_KEY, base_url="https://dashscope.aliyuncs.com/compatible-mode/v1")
-    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M3}, {"role": "user", "content": text}], temperature=0.0)
+    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M3}, {"role": "user", "content": text}])
     return resp.choices[0].message.content
 
 @st.cache_data(show_spinner=False, persist="disk")
 def fetch_m4_evaluation(text):
     client = OpenAI(api_key=API_KEY, base_url="https://dashscope.aliyuncs.com/compatible-mode/v1")
-    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M4}, {"role": "user", "content": text}], temperature=0.0)
+    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M4}, {"role": "user", "content": text}])
     return resp.choices[0].message.content
 
-def robust_json_parse(text):
-    """
-    专门用于处理大模型返回的不规则 JSON 字符串的健壮解析器。
-    """
-    text = text.strip()
-    # 1. 剥离 Markdown 格式
-    if text.startswith("```json"):
-        text = text[7:]
-    elif text.startswith("```"):
-        text = text[3:]
-    if text.endswith("```"):
-        text = text[:-3]
-    text = text.strip()
-
-    try:
-        # 尝试标准解析
-        return json.loads(text)
-    except json.JSONDecodeError as e:
-        # 常见错误修复1：处理大模型在结尾处多加的逗号
-        text = re.sub(r',\s*}', '}', text)
-        text = re.sub(r',\s*]', ']', text)
-        
-        # 常见错误修复2：处理评价文本中未经转义的内部双引号 (非常粗暴但有效的方法)
-        # 将内部包含的异常格式替换掉，这里仅做最基本的兜底
-        try:
-            return json.loads(text)
-        except Exception as e2:
-            st.warning(f"⚠️ 大模型返回的 JSON 格式存在严重错误，已尝试自动修复但失败。请尝试重新点击运行按钮。错误详情: {e2}")
-            # 返回一个空的基础结构，防止后续代码全部崩溃
-            return {}
 # ==========================================
 # 模块计算逻辑区 
 # ==========================================
@@ -407,7 +377,7 @@ def plot_st_chart(sequence):
         t_counts.append(current_t)
         s_counts.append(current_s)
         
-    plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'sans-serif']
+    plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'sans-serif']  
     plt.rcParams['axes.unicode_minus'] = False     
     fig, ax = plt.subplots(figsize=(6, 6))
     ax.plot(t_counts, s_counts, marker='', linestyle='-', color='#1f77b4', linewidth=3, label="实际教学轨迹")
@@ -433,7 +403,7 @@ def plot_st_chart(sequence):
     return fig
 
 def plot_rt_ch_chart(Rt, Ch):
-    plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'sans-serif']
+   plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'sans-serif']
     plt.rcParams['axes.unicode_minus'] = False
     fig, ax = plt.subplots(figsize=(6, 5))
     ax.set_xlim(0, 1); ax.set_ylim(0, 1.05) 
@@ -544,20 +514,16 @@ if st.button("🚀 一键生成课堂多维诊断与综合评分"):
             
             progress_bar.progress(95, text="✨ AI 分析完毕！正在计算综合得分并生成大屏...")
 
-            # 解析并计算模块一
-            ai_data_m1 = robust_json_parse(resp_m1_content)
+            ai_data_m1 = json.loads(resp_m1_content.strip().replace('```json', '').replace('```', ''))
             metrics_m1 = calculate_metrics_m1(ai_data_m1)
             
-            # 解析并计算模块二
-            ai_data_m2 = robust_json_parse(resp_m2_content)
+            ai_data_m2 = json.loads(resp_m2_content.strip().replace('```json', '').replace('```', ''))
             metrics_m2 = calculate_metrics_m2(ai_data_m2)
             
-            # 解析并计算模块三
-            ai_data_m3 = robust_json_parse(resp_m3_content)
+            ai_data_m3 = json.loads(resp_m3_content.strip().replace('```json', '').replace('```', ''))
             metrics_m3 = calculate_metrics_m3(ai_data_m3)
             
-            # 解析并计算模块四
-            ai_data_m4 = robust_json_parse(resp_m4_content)
+            ai_data_m4 = json.loads(resp_m4_content.strip().replace('```json', '').replace('```', ''))
             metrics_m4 = calculate_metrics_m4(ai_data_m4)
             
             overall = calculate_overall_score(metrics_m1, metrics_m2, metrics_m3, metrics_m4)
@@ -709,8 +675,3 @@ if st.button("🚀 一键生成课堂多维诊断与综合评分"):
         except Exception as e:
             progress_bar.empty()
             st.error(f"发生错误：{e}")
-
-
-
-
-
