@@ -377,7 +377,7 @@ def plot_st_chart(sequence):
         t_counts.append(current_t)
         s_counts.append(current_s)
         
-    plt.rcParams['font.sans-serif'] = ['SimHei']  
+    plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'sans-serif']
     plt.rcParams['axes.unicode_minus'] = False     
     fig, ax = plt.subplots(figsize=(6, 6))
     ax.plot(t_counts, s_counts, marker='', linestyle='-', color='#1f77b4', linewidth=3, label="实际教学轨迹")
@@ -403,7 +403,7 @@ def plot_st_chart(sequence):
     return fig
 
 def plot_rt_ch_chart(Rt, Ch):
-    plt.rcParams['font.sans-serif'] = ['SimHei']
+    plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'sans-serif']
     plt.rcParams['axes.unicode_minus'] = False
     fig, ax = plt.subplots(figsize=(6, 5))
     ax.set_xlim(0, 1); ax.set_ylim(0, 1.05) 
@@ -422,7 +422,7 @@ def plot_rt_ch_chart(Rt, Ch):
     return fig
 
 def plot_bloom_pie(high, low):
-    plt.rcParams['font.sans-serif'] = ['SimHei']
+    plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'sans-serif']
     fig, ax = plt.subplots(figsize=(4, 4))
     sizes = [high, low] if (high + low) > 0 else [1, 1]
     ax.pie(sizes, labels=['高阶问题', '低阶问题'], colors=['#ff9999', '#66b3ff'], autopct='%1.1f%%', startangle=90)
@@ -430,14 +430,14 @@ def plot_bloom_pie(high, low):
     return fig
 
 def plot_four_w_bar(know, app):
-    plt.rcParams['font.sans-serif'] = ['SimHei']
+    plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'sans-serif']
     fig, ax = plt.subplots(figsize=(4, 4))
     ax.bar(['知识性\n(是何/为何)', '应用性\n(如何/若何)'], [know, app], color=['#99ff99', '#ffcc99'])
     ax.set_ylabel("问题数量"); ax.set_title("“四何”问题分布图", fontweight='bold')
     return fig
 
 def plot_m3_radar(metrics_m3):
-    plt.rcParams['font.sans-serif'] = ['SimHei']
+    plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'sans-serif']
     labels = ['政治认同', '科学精神', '法治意识', '公共参与']
     grade_map = {'A级': 4, 'B级': 3, 'C级': 2, 'D级': 1}
     values = [
@@ -675,3 +675,4 @@ if st.button("🚀 一键生成课堂多维诊断与综合评分"):
         except Exception as e:
             progress_bar.empty()
             st.error(f"发生错误：{e}")
+
