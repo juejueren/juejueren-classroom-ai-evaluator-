@@ -544,10 +544,10 @@ if st.button("🚀 一键生成课堂多维诊断与综合评分"):
             
             progress_bar.progress(95, text="✨ AI 分析完毕！正在计算综合得分并生成大屏...")
 
-           ai_data_m1 = robust_json_parse(resp_m1_content)
-           ai_data_m2 = robust_json_parse(resp_m2_content)
-           ai_data_m3 = robust_json_parse(resp_m3_content)
-           ai_data_m4 = robust_json_parse(resp_m4_content)
+            ai_data_m1 = robust_json_parse(resp_m1_content)
+            ai_data_m2 = robust_json_parse(resp_m2_content)
+            ai_data_m3 = robust_json_parse(resp_m3_content)
+            ai_data_m4 = robust_json_parse(resp_m4_content)
             
             overall = calculate_overall_score(metrics_m1, metrics_m2, metrics_m3, metrics_m4)
             
@@ -698,6 +698,7 @@ if st.button("🚀 一键生成课堂多维诊断与综合评分"):
         except Exception as e:
             progress_bar.empty()
             st.error(f"发生错误：{e}")
+
 
 
 
