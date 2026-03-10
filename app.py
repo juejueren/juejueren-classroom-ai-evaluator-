@@ -377,8 +377,10 @@ def plot_st_chart(sequence):
         t_counts.append(current_t)
         s_counts.append(current_s)
         
+    # 修复缩进：确保以下两行完全对齐
     plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'sans-serif']  
     plt.rcParams['axes.unicode_minus'] = False     
+    
     fig, ax = plt.subplots(figsize=(6, 6))
     ax.plot(t_counts, s_counts, marker='', linestyle='-', color='#1f77b4', linewidth=3, label="实际教学轨迹")
     if len(t_counts) > 0 and len(s_counts) > 0:
@@ -403,7 +405,8 @@ def plot_st_chart(sequence):
     return fig
 
 def plot_rt_ch_chart(Rt, Ch):
-   plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'sans-serif']
+    # 修复缩进：删除函数内部第一行前面的多余空格
+    plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'sans-serif']
     plt.rcParams['axes.unicode_minus'] = False
     fig, ax = plt.subplots(figsize=(6, 5))
     ax.set_xlim(0, 1); ax.set_ylim(0, 1.05) 
@@ -675,3 +678,4 @@ if st.button("🚀 一键生成课堂多维诊断与综合评分"):
         except Exception as e:
             progress_bar.empty()
             st.error(f"发生错误：{e}")
+
