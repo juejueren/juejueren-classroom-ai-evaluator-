@@ -160,6 +160,36 @@ def fetch_m4_evaluation(text):
     resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M4}, {"role": "user", "content": text}], temperature=0.0)
     return resp.choices[0].message.content
 
+def robust_json_parse(text):
+    """
+    专门用于处理大模型返回的不规则 JSON 字符串的健壮解析器。
+    """
+    text = text.strip()
+    # 1. 剥离 Markdown 格式
+    if text.startswith("```json"):
+        text = text[7:]
+    elif text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    text = text.strip()
+
+    try:
+        # 尝试标准解析
+        return json.loads(text)
+    except json.JSONDecodeError as e:
+        # 常见错误修复1：处理大模型在结尾处多加的逗号
+        text = re.sub(r',\s*}', '}', text)
+        text = re.sub(r',\s*]', ']', text)
+        
+        # 常见错误修复2：处理评价文本中未经转义的内部双引号 (非常粗暴但有效的方法)
+        # 将内部包含的异常格式替换掉，这里仅做最基本的兜底
+        try:
+            return json.loads(text)
+        except Exception as e2:
+            st.warning(f"⚠️ 大模型返回的 JSON 格式存在严重错误，已尝试自动修复但失败。请尝试重新点击运行按钮。错误详情: {e2}")
+            # 返回一个空的基础结构，防止后续代码全部崩溃
+            return {}
 # ==========================================
 # 模块计算逻辑区 
 # ==========================================
@@ -514,17 +544,10 @@ if st.button("🚀 一键生成课堂多维诊断与综合评分"):
             
             progress_bar.progress(95, text="✨ AI 分析完毕！正在计算综合得分并生成大屏...")
 
-            ai_data_m1 = json.loads(resp_m1_content.strip().replace('```json', '').replace('```', ''))
-            metrics_m1 = calculate_metrics_m1(ai_data_m1)
-            
-            ai_data_m2 = json.loads(resp_m2_content.strip().replace('```json', '').replace('```', ''))
-            metrics_m2 = calculate_metrics_m2(ai_data_m2)
-            
-            ai_data_m3 = json.loads(resp_m3_content.strip().replace('```json', '').replace('```', ''))
-            metrics_m3 = calculate_metrics_m3(ai_data_m3)
-            
-            ai_data_m4 = json.loads(resp_m4_content.strip().replace('```json', '').replace('```', ''))
-            metrics_m4 = calculate_metrics_m4(ai_data_m4)
+           ai_data_m1 = robust_json_parse(resp_m1_content)
+           ai_data_m2 = robust_json_parse(resp_m2_content)
+           ai_data_m3 = robust_json_parse(resp_m3_content)
+           ai_data_m4 = robust_json_parse(resp_m4_content)
             
             overall = calculate_overall_score(metrics_m1, metrics_m2, metrics_m3, metrics_m4)
             
@@ -675,5 +698,6 @@ if st.button("🚀 一键生成课堂多维诊断与综合评分"):
         except Exception as e:
             progress_bar.empty()
             st.error(f"发生错误：{e}")
+
 
 
