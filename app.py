@@ -19,7 +19,7 @@ os.environ["ALL_PROXY"] = ""
 # ==========================================
 # 核心配置区
 # ==========================================
-API_KEY = "sk-b6dabdd5294a42b283fdd855ba80df92"  
+API_KEY = st.secrets["QWEN_API_KEY"]
 
 # 模块一：课堂调控 Prompt
 SYSTEM_PROMPT_M1 = """你是一个严谨的教育评价专家，精通弗兰德斯互动分析与 S-T 课堂分析法。
