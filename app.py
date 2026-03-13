@@ -139,25 +139,25 @@ SYSTEM_PROMPT_M4 = """# Role
 @st.cache_data(show_spinner=False, persist="disk")
 def fetch_m1_evaluation(text):
     client = OpenAI(api_key=API_KEY, base_url="https://dashscope.aliyuncs.com/compatible-mode/v1")
-    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M1}, {"role": "user", "content": text}])
+    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M1}, {"role": "user", "content": text}],temperature=0)
     return resp.choices[0].message.content
 
 @st.cache_data(show_spinner=False, persist="disk")
 def fetch_m2_evaluation(text):
     client = OpenAI(api_key=API_KEY, base_url="https://dashscope.aliyuncs.com/compatible-mode/v1")
-    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M2}, {"role": "user", "content": text}])
+    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M2}, {"role": "user", "content": text}],temperature=0)
     return resp.choices[0].message.content
 
 @st.cache_data(show_spinner=False, persist="disk")
 def fetch_m3_evaluation(text):
     client = OpenAI(api_key=API_KEY, base_url="https://dashscope.aliyuncs.com/compatible-mode/v1")
-    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M3}, {"role": "user", "content": text}])
+    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M3}, {"role": "user", "content": text}],temperature=0)
     return resp.choices[0].message.content
 
 @st.cache_data(show_spinner=False, persist="disk")
 def fetch_m4_evaluation(text):
     client = OpenAI(api_key=API_KEY, base_url="https://dashscope.aliyuncs.com/compatible-mode/v1")
-    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M4}, {"role": "user", "content": text}])
+    resp = client.chat.completions.create(model="qwen-plus", messages=[{"role": "system", "content": SYSTEM_PROMPT_M4}, {"role": "user", "content": text}],temperature=0)
     return resp.choices[0].message.content
 
 # ==========================================
@@ -680,4 +680,5 @@ if st.button("🚀 一键生成课堂多维诊断与综合评分"):
         except Exception as e:
             progress_bar.empty()
             st.error(f"发生错误：{e}")
+
 
