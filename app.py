@@ -399,7 +399,7 @@ def plot_rt_ch_chart(Rt, Ch):
     fig, ax = plt.subplots(figsize=(6, 5))
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1.05) 
-    ax.set_xlabel("Student Dominance (Rt)", fontsize=10)
+    ax.set_xlabel("Teacher Dominance (Rt)", fontsize=10)
     ax.set_ylabel("Interaction Effectiveness (Ch)", fontsize=10)
     ax.set_title("Rt-Ch Teaching Model Analysis", fontsize=12, fontweight='bold')
     
@@ -680,3 +680,4 @@ if st.button("🚀 一键生成课堂多维诊断与综合评分"):
         except Exception as e:
             progress_bar.empty()
             st.error(f"发生错误：{e}")
+
